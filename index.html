@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#07090a" />
+  <meta name="description" content="Blackwood — a first-person survival horror experience. Find the fuses. Restore the power. Do not let it hear you." />
+  <title>BLACKWOOD — Survival Horror</title>
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app">
+    <canvas id="scene" aria-label="Blackwood, a first-person survival horror game"></canvas>
+
+    <div id="vignette" aria-hidden="true"></div>
+    <div id="damageFlash" aria-hidden="true"></div>
+    <div id="fade" aria-hidden="true"></div>
+
+    <div id="hud" aria-hidden="true">
+      <div class="hud-top">
+        <div class="objective-card">
+          <div class="eyebrow"><span class="pulse-dot"></span> CURRENT OBJECTIVE</div>
+          <div class="objective-row">
+            <div id="objectiveText">FIND THE THREE FUSES</div>
+            <div id="fusePips" class="fuse-pips"><i></i><i></i><i></i></div>
+          </div>
+          <div id="objectiveSub">The east and west wings. The chapel.</div>
+        </div>
+
+        <div class="compass-wrap">
+          <div class="compass-rule"></div>
+          <div id="compassTape" class="compass-tape">
+            <span>W</span><span>NW</span><span>N</span><span>NE</span><span>E</span><span>SE</span><span>S</span><span>SW</span><span>W</span>
+          </div>
+          <div class="compass-notch"></div>
+        </div>
+
+        <div class="rec-wrap">
+          <div class="rec"><span class="rec-dot"></span> REC</div>
+          <div id="recTime" class="rec-time">00:00:00</div>
+        </div>
+      </div>
+
+      <div id="healthPanel" class="health-panel">
+        <div class="vitals-label">VITALS <span id="healthState">STABLE</span></div>
+        <div class="vitals-bar"><div id="healthFill"></div><div class="vitals-ticks"></div></div>
+      </div>
+
+      <div id="crosshair" class="crosshair">
+        <i class="ch-t"></i><i class="ch-r"></i><i class="ch-b"></i><i class="ch-l"></i><b></b>
+      </div>
+      <div id="hitmarker" class="hitmarker"><i></i><i></i><i></i><i></i></div>
+
+      <div id="weaponPanel" class="weapon-panel">
+        <div class="weapon-name">SERVICE PISTOL <span>9MM</span></div>
+        <div class="ammo-row"><strong id="ammoMag">08</strong><span class="slash">/</span><span id="ammoReserve">24</span></div>
+        <div id="reloadHint" class="reload-hint">R · RELOAD</div>
+      </div>
+
+      <div id="interactPrompt" class="interact-prompt">
+        <span class="prompt-key" id="promptKey">E</span>
+        <span id="promptText">OPEN DOOR</span>
+      </div>
+
+      <div id="subtitle" class="subtitle"></div>
+      <div id="toast" class="toast"></div>
+
+      <div id="compassObjective" class="objective-arrow" aria-hidden="true"></div>
+
+      <div class="desktop-hint" id="desktopHint">
+        <span><b>WASD</b> MOVE</span><span><b>MOUSE</b> LOOK</span><span><b>F</b> LIGHT</span><span><b>E</b> USE</span><span><b>R</b> RELOAD</span>
+      </div>
+
+      <div id="touchUI" class="touch-ui">
+        <div id="stick" class="stick"><div class="stick-ring"></div><div id="stickKnob" class="stick-knob"></div></div>
+        <div class="touch-brand">BLACKWOOD</div>
+
+        <button id="btnAim" class="round-btn aim-btn" aria-label="Aim"><span class="btn-icon">◎</span><span class="btn-label">AIM</span></button>
+        <button id="btnFire" class="round-btn fire-btn" aria-label="Fire"><span class="fire-inner"></span><span class="btn-label">FIRE</span></button>
+        <button id="btnReload" class="round-btn small-btn reload-btn" aria-label="Reload"><span class="btn-icon">↻</span></button>
+        <button id="btnLight" class="round-btn small-btn light-btn" aria-label="Toggle flashlight"><span class="btn-icon">✦</span></button>
+        <button id="btnInteract" class="round-btn interact-btn" aria-label="Interact"><span class="prompt-key">E</span><span class="btn-label">USE</span></button>
+      </div>
+    </div>
+
+    <section id="menu" class="screen menu-screen">
+      <div class="menu-grain"></div>
+      <header class="menu-top">
+        <div class="menu-brand"><span class="brand-mark">✚</span> BLACKWOOD SANATORIUM <em>EST. 1911</em></div>
+        <div class="menu-status"><span class="status-dot"></span> ADMISSIONS CLOSED · 1987</div>
+      </header>
+
+      <div class="menu-hero">
+        <div class="menu-kicker"><span></span> A FIRST-PERSON SURVIVAL HORROR <span></span></div>
+        <h1>BLACK<span>WOOD</span></h1>
+        <div class="menu-rule"><i></i><b>THE LAST ROUND</b><i></i></div>
+        <p class="menu-copy">The switchboard has been dead for six days.<br />The front door is chained from the inside.</p>
+        <button id="startBtn" class="start-btn" aria-label="Start"><span class="start-arrow">▸</span><span>START</span></button>
+        <div class="menu-foot">
+          <span>HEADPHONES RECOMMENDED</span>
+          <span class="menu-sep">/</span>
+          <button id="soundBtn" class="text-btn" aria-label="Toggle sound">SOUND ON</button>
+          <span class="menu-sep">/</span>
+          <span class="menu-controls">TOUCH + WASD + MOUSE</span>
+        </div>
+      </div>
+
+      <aside class="case-file">
+        <div class="case-head"><span>CASE FILE</span><b>87—114</b></div>
+        <div class="case-photo" aria-hidden="true"><div class="photo-figure"></div><div class="photo-scratches"></div></div>
+        <dl>
+          <div><dt>LOCATION</dt><dd>BLACKWOOD, WV</dd></div>
+          <div><dt>MISSING</dt><dd>23 STAFF · 4 PATIENTS</dd></div>
+          <div><dt>LAST SIGNAL</dt><dd>OCT 06 · 02:14</dd></div>
+          <div><dt>STATUS</dt><dd class="red">ACTIVE</dd></div>
+        </dl>
+        <div class="case-stamp">DO NOT<br />DISTURB</div>
+      </aside>
+
+      <div class="menu-bottom">
+        <span>© 1987 BLACKWOOD STATE BOARD</span>
+        <span>FILE NO. 04 / RECOVERED</span>
+      </div>
+    </section>
+
+    <div id="loading" class="screen loading-screen">
+      <div class="load-inner">
+        <div class="load-mark">✚</div>
+        <div class="load-title">BLACKWOOD</div>
+        <div class="load-bar"><i id="loadFill"></i></div>
+        <div id="loadText" class="load-text">RECOVERING PATIENT FILES…</div>
+      </div>
+    </div>
+
+    <section id="pause" class="screen modal-screen hidden" aria-hidden="true">
+      <div class="modal-noise"></div>
+      <div class="pause-inner">
+        <div class="modal-kicker">SIGNAL INTERRUPTED</div>
+        <h2>PAUSED</h2>
+        <p>The halls are quiet. For now.</p>
+        <div class="modal-actions">
+          <button id="resumeBtn" class="panel-btn primary">RESUME</button>
+          <button id="restartBtn" class="panel-btn">RESTART</button>
+          <button id="muteBtn" class="panel-btn">SOUND: <span>ON</span></button>
+        </div>
+        <div class="pause-tip">TIP — light attracts attention. So does gunfire.</div>
+      </div>
+    </section>
+
+    <section id="note" class="screen modal-screen hidden" aria-hidden="true">
+      <div class="modal-noise"></div>
+      <article class="note-paper">
+        <div class="note-head">
+          <span>BLACKWOOD SANATORIUM</span>
+          <span id="noteTag">PATIENT INTAKE / 87-04</span>
+        </div>
+        <div class="note-hr"></div>
+        <h3 id="noteTitle">THE THING IN THE WALLS</h3>
+        <div id="noteBody" class="note-body"></div>
+        <div class="note-sign" id="noteSign">— DR. E. VALE</div>
+        <button id="noteClose" class="note-close" aria-label="Close note">CLOSE FILE <span>[ E ]</span></button>
+      </article>
+    </section>
+
+    <section id="death" class="screen end-screen hidden" aria-hidden="true">
+      <div class="end-grain"></div>
+      <div class="end-inner">
+        <div class="modal-kicker red">CAUSE OF DEATH</div>
+        <h2 class="death-title">YOU DIED</h2>
+        <p id="deathLine">The sanatorium keeps what it takes.</p>
+        <div class="end-stats">
+          <div><span>TIME SURVIVED</span><b id="deathTime">00:00</b></div>
+          <div><span>FUSES RECOVERED</span><b id="deathFuses">0 / 3</b></div>
+        </div>
+        <button id="retryBtn" class="panel-btn primary">TRY AGAIN</button>
+      </div>
+    </section>
+
+    <section id="win" class="screen end-screen win-screen hidden" aria-hidden="true">
+      <div class="end-grain"></div>
+      <div class="end-inner">
+        <div class="modal-kicker">CASE STATUS — SURVIVOR</div>
+        <h2 class="win-title">YOU ESCAPED<br /><span>BLACKWOOD</span></h2>
+        <p class="win-copy">The road is empty for miles. Behind you, every window is dark.<br />Except one.</p>
+        <div class="end-stats">
+          <div><span>TIME IN THE DARK</span><b id="winTime">00:00</b></div>
+          <div><span>SHOTS FIRED</span><b id="winShots">0</b></div>
+          <div><span>STATUS</span><b>UNRESOLVED</b></div>
+        </div>
+        <button id="againBtn" class="panel-btn primary">PLAY AGAIN</button>
+      </div>
+    </section>
+
+    <div id="chapterCard" class="chapter-card" aria-hidden="true">
+      <div class="chapter-rule"></div>
+      <span>CHAPTER I</span>
+      <strong>THE LAST ROUND</strong>
+      <em>OCTOBER 12, 1987 · 2:17 AM</em>
+      <div class="chapter-rule"></div>
+    </div>
+
+    <div id="introWhisper" class="intro-whisper" aria-hidden="true">“If you can hear this… don’t let it see the light.”</div>
+
+    <div id="rotateNotice" class="rotate-notice hidden">
+      <div class="rotate-icon">▭</div>
+      <strong>BETTER IN LANDSCAPE</strong>
+      <span>Rotate your device, or continue in portrait.</span>
+      <button id="rotateContinue">CONTINUE</button>
+    </div>
+
+    <noscript>BLACKWOOD requires JavaScript.</noscript>
+  </div>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
